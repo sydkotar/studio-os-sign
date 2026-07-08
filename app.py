@@ -99,7 +99,8 @@ if not rows:
 row = rows[0]
 
 if row["status"] == "signed":
-    st.success(f"This contract was already signed by {row['signed_by_name']} on {row['signed_at']}.")
+    signed_date = datetime.fromisoformat(row["signed_at"]).date().isoformat()
+    st.success(f"This contract was already signed by {row['signed_by_name']} on {signed_date}.")
     st.stop()
 
 expires_at = datetime.fromisoformat(row["expires_at"])
