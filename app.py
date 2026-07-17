@@ -35,6 +35,8 @@ from PIL import Image
 from streamlit_drawable_canvas import st_canvas
 from supabase import create_client
 
+import contract_pdf
+
 st.set_page_config(page_title="Sign your contract / Firma tu contrato", page_icon="✍️")
 
 TEMPLATES_DIR = Path(__file__).parent / "contract_templates"
@@ -63,6 +65,9 @@ STRINGS = {
         "need_drawing": "Please draw your signature.",
         "thanks": "Thank you! Your signature has been recorded.",
         "quote_ref": "Quotation reference: {ref}",
+        "download": "Download your signed contract (PDF)",
+        "download_ready": "Your signed copy is ready to download below.",
+        "download_error": "Signed, but the PDF couldn't be generated here — Sydney will send you a copy.",
     },
     "es": {
         "missing_token": "A este enlace le falta el token de firma.",
@@ -84,6 +89,9 @@ STRINGS = {
         "need_drawing": "Por favor, dibuja tu firma.",
         "thanks": "¡Gracias! Tu firma ha quedado registrada.",
         "quote_ref": "Referencia de presupuesto: {ref}",
+        "download": "Descarga tu contrato firmado (PDF)",
+        "download_ready": "Tu copia firmada está lista para descargar abajo.",
+        "download_error": "Firmado, pero no se pudo generar el PDF aquí — Sydney te enviará una copia.",
     },
 }
 
@@ -91,6 +99,39 @@ STRINGS = {
 def lang_of(row):
     """'es' only when the row explicitly says so, else 'en'."""
     return "es" if str(row.get("language") or "en").lower().startswith("es") else "en"
+
+
+def signed_pdf_bytes(row, signature_bytes, language):
+    """Render the signed contract to PDF bytes so the client can download it.
+    Uses PROVIDER_NIF (required secret) + optional CONTACT_EMAIL/CONTACT_PHONE
+    secrets for the footer. Returns bytes, or None if anything is missing/fails
+    (the caller then tells the client Sydney will send a copy)."""
+    try:
+        signed_date = None
+        if row.get("signed_at"):
+            signed_date = datetime.fromisoformat(row["signed_at"]).date().isoformat()
+        return contract_pdf.render_signed_contract_bytes(
+            contract_type=row["contract_type"],
+            client_name=row["client_name"],
+            provider_nif=st.secrets["PROVIDER_NIF"],
+            client_company=row.get("client_company"),
+            client_address=row.get("client_address"),
+            quotation_reference=row.get("quotation_reference"),
+            event_location=row.get("event_location"),
+            signed_by_name=row.get("signed_by_name"),
+            signed_date=signed_date,
+            signature_image_bytes=signature_bytes,
+            language=language,
+            contact_email=st.secrets.get("CONTACT_EMAIL"),
+            contact_phone=st.secrets.get("CONTACT_PHONE"),
+        )
+    except Exception:
+        return None
+
+
+def _download_name(client_name):
+    safe = "".join(ch if ch.isalnum() else "-" for ch in (client_name or "contrato")).strip("-")
+    return f"contrato-firmado-{safe or 'contrato'}.pdf"
 
 
 @st.cache_resource
@@ -173,6 +214,16 @@ t = STRINGS[language]
 if row["status"] == "signed":
     signed_date = datetime.fromisoformat(row["signed_at"]).date().isoformat()
     st.success(t["already_signed"].format(name=row["signed_by_name"], date=signed_date))
+    _sig = None
+    if row.get("signature_image_base64"):
+        try:
+            _sig = base64.b64decode(row["signature_image_base64"])
+        except Exception:
+            _sig = None
+    _pdf = signed_pdf_bytes(row, _sig, language) if _sig else None
+    if _pdf:
+        st.download_button(t["download"], _pdf, file_name=_download_name(row["client_name"]),
+                           mime="application/pdf")
     st.stop()
 
 expires_at = datetime.fromisoformat(row["expires_at"])
@@ -223,12 +274,23 @@ if st.button(t["submit"]):
         img = Image.fromarray(canvas_result.image_data.astype("uint8"), mode="RGBA")
         buf = io.BytesIO()
         img.save(buf, format="PNG")
-        signature_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+        signature_bytes = buf.getvalue()
+        signature_b64 = base64.b64encode(signature_bytes).decode("ascii")
+        _signed_at = datetime.now(timezone.utc).isoformat()
         sb.table("pending_signatures").update({
             "status": "signed",
             "signed_by_name": name_input.strip(),
             "signature_image_base64": signature_b64,
-            "signed_at": datetime.now(timezone.utc).isoformat(),
+            "signed_at": _signed_at,
         }).eq("token", token).execute()
         st.success(t["thanks"])
         st.balloons()
+        # Let the client download their signed copy immediately.
+        _signed_row = {**row, "signed_by_name": name_input.strip(), "signed_at": _signed_at}
+        _pdf = signed_pdf_bytes(_signed_row, signature_bytes, language)
+        if _pdf:
+            st.write(t["download_ready"])
+            st.download_button(t["download"], _pdf, file_name=_download_name(row["client_name"]),
+                               mime="application/pdf")
+        else:
+            st.info(t["download_error"])
