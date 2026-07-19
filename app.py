@@ -132,15 +132,27 @@ def signed_pdf_bytes(row, signature_bytes, language):
 
 
 def _provider_sig_bytes():
-    """Sydney's pre-embedded signature for the counter-signed copy, from the
-    PROVIDER_SIGNATURE_B64 secret (base64). Kept out of this public repo. Returns
-    bytes or None (block renders blank if the secret isn't set)."""
+    """Sydney's pre-embedded signature for the counter-signed copy. Kept out of
+    this public repo. Source order: a PROVIDER_SIGNATURE_B64 secret if set, else
+    a Supabase config row (token '__PROVIDER_SIGNATURE__') read with the anon key
+    -- so it works with no extra Streamlit secret. Returns bytes or None (the
+    provider block just renders blank if neither is available)."""
+    import base64 as _b64
     try:
-        import base64 as _b64
         raw = st.secrets.get("PROVIDER_SIGNATURE_B64")
-        return _b64.b64decode(raw) if raw else None
+        if raw:
+            return _b64.b64decode(raw)
     except Exception:
-        return None
+        pass
+    try:
+        rows = (get_client().table("pending_signatures")
+                .select("signature_image_base64")
+                .eq("token", "__PROVIDER_SIGNATURE__").execute().data)
+        if rows and rows[0].get("signature_image_base64"):
+            return _b64.b64decode(rows[0]["signature_image_base64"])
+    except Exception:
+        pass
+    return None
 
 
 def _download_name(client_name):
