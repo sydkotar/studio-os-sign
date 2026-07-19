@@ -87,7 +87,7 @@ def _signature_image_flowable(image_bytes):
     return img
 
 
-def _parse_template(text, signature_image_bytes=None):
+def _parse_template(text, signature_image_bytes=None, provider_signature_bytes=None):
     flowables = []
     lines = text.split("\n")
     para_buffer = []
@@ -115,6 +115,11 @@ def _parse_template(text, signature_image_bytes=None):
             if signature_image_bytes:
                 flowables.append(_signature_image_flowable(signature_image_bytes))
             i += 1; continue
+        if stripped == "[[PROVIDER_SIGNATURE_IMAGE]]":
+            flush_paragraph()
+            if provider_signature_bytes:
+                flowables.append(_signature_image_flowable(provider_signature_bytes))
+            i += 1; continue
         if stripped == "[[TABLE]]":
             flush_paragraph(); i += 1
             rows = []
@@ -140,6 +145,7 @@ def render_signed_contract_bytes(
     event_location=None, signed_by_name=None, signed_date=None,
     signature_image_bytes=None, language="en",
     contact_email=None, contact_phone=None,
+    provider_signature_bytes=None, provider_signature_date=None,
 ):
     """Render the filled (and, when a signature is given, signed) contract to PDF
     bytes. `provider_nif` is required (from st.secrets). contact_email/phone are
@@ -160,8 +166,11 @@ def render_signed_contract_bytes(
         filled = filled.replace("{{ubicacion}}", event_location or "_")
     filled = filled.replace("{{client_signature_line}}", "" if signed_by_name else "_")
     filled = filled.replace("{{client_signature_date}}", signed_date or "_")
+    filled = filled.replace("{{provider_signature_date}}",
+                            provider_signature_date if provider_signature_bytes else "_")
 
-    flowables = _parse_template(filled, signature_image_bytes=signature_image_bytes)
+    flowables = _parse_template(filled, signature_image_bytes=signature_image_bytes,
+                               provider_signature_bytes=provider_signature_bytes)
 
     footer_left = f"{contact_email} · {contact_phone}" if (contact_email and contact_phone) else \
         (contact_email or contact_phone or "")

@@ -124,7 +124,21 @@ def signed_pdf_bytes(row, signature_bytes, language):
             language=language,
             contact_email=st.secrets.get("CONTACT_EMAIL"),
             contact_phone=st.secrets.get("CONTACT_PHONE"),
+            provider_signature_bytes=_provider_sig_bytes(),
+            provider_signature_date=datetime.now(timezone.utc).strftime("%d/%m/%Y"),
         )
+    except Exception:
+        return None
+
+
+def _provider_sig_bytes():
+    """Sydney's pre-embedded signature for the counter-signed copy, from the
+    PROVIDER_SIGNATURE_B64 secret (base64). Kept out of this public repo. Returns
+    bytes or None (block renders blank if the secret isn't set)."""
+    try:
+        import base64 as _b64
+        raw = st.secrets.get("PROVIDER_SIGNATURE_B64")
+        return _b64.b64decode(raw) if raw else None
     except Exception:
         return None
 
