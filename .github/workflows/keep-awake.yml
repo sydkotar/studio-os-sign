@@ -18,10 +18,12 @@ jobs:
         run: |
           URL="https://studio-os-sign-vpeu9hkzcvg3epn87tmilf.streamlit.app/"
           for i in 1 2 3 4 5 6; do
-            code=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 45 "$URL" || echo "000")
+            # no -L: a raw GET returns Streamlit's own code (200 when awake,
+            # 303 redirect otherwise) -- either means the server was reached,
+            # which is the traffic that keeps it warm.
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 45 "$URL" || echo "000")
             echo "attempt $i: HTTP $code"
-            # 200/303 = app responding; anything else may be mid-wake, so retry
-            case "$code" in 200|303) echo "app is awake"; exit 0;; esac
+            case "$code" in 2*|3*) echo "app reached (keeping it warm)"; exit 0;; esac
             sleep 15
           done
-          echo "app did not confirm awake this run (it was still pinged, which triggers the wake)"
+          echo "no response yet; the pings above still trigger the wake"
