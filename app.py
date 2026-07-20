@@ -195,6 +195,11 @@ def fill_contract_markdown(contract_type, row, language, t):
     text = text.replace("{{client_signature_line}}", "_")
     text = text.replace("{{client_signature_date}}", "_")
     text = text.replace("[[SIGNATURE_IMAGE]]", "")
+    # Provider (Sydney) is pre-signed; on the on-page reading view show the date
+    # and blank the image placeholder (her actual signature renders in the
+    # downloaded PDF via contract_pdf), same as the client [[SIGNATURE_IMAGE]].
+    text = text.replace("{{provider_signature_date}}", datetime.now(timezone.utc).strftime("%d/%m/%Y"))
+    text = text.replace("[[PROVIDER_SIGNATURE_IMAGE]]", "")
 
     lines = text.split("\n")
     out = []

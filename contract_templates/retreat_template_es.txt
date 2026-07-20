@@ -485,9 +485,10 @@ Si alguna disposición de este Contrato se declara inválida o inaplicable, las 
 Al firmar a continuación, ambas partes confirman que han leído, comprendido y aceptado este Contrato.
 
 **Fotógrafa/Videógrafa**
-Nombre: Sydney Kotar
-Firma: _
-Fecha: _
+Nombre: Sydney Ann Kotar
+Firma:
+[[PROVIDER_SIGNATURE_IMAGE]]
+Fecha: {{provider_signature_date}}
 
 **Cliente**
 Nombre: {{client_name}}

@@ -491,9 +491,10 @@ If any provision of this Agreement is found to be invalid or unenforceable, the 
 By signing below, both parties confirm that they have read, understood, and accepted this Agreement.
 
 **Photographer/Videographer**
-Name: Sydney Kotar
-Signature: _
-Date: _
+Name: Sydney Ann Kotar
+Signature:
+[[PROVIDER_SIGNATURE_IMAGE]]
+Date: {{provider_signature_date}}
 
 **Client**
 Name: {{client_name}}
