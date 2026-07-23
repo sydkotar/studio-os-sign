@@ -1,0 +1,19 @@
+#!/bin/sh
+# studio-os-sign pre-commit guard (version-controlled; enable once per clone:
+#   git config core.hooksPath .githooks
+# ). This repo is PUBLIC — anything committed is world-readable immediately.
+#   1. Block staging of secret/config files that must never be committed.
+#   2. Block credential-shaped content (scripts/scan_secrets.py, vendored
+#      from the studio-os repo — keep the two copies in sync).
+set -e
+REPO="$(git rev-parse --show-toplevel)"
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+BAD=$(printf '%s\n' "$STAGED" | grep -iE 'secrets\.toml|\.streamlit/|\.db$|esign_config' || true)
+if [ -n "$BAD" ]; then
+  echo "pre-commit BLOCKED: a never-commit file is staged (this repo is PUBLIC):"
+  printf '  %s\n' $BAD
+  exit 1
+fi
+
+python3 "$REPO/scripts/scan_secrets.py" --staged
