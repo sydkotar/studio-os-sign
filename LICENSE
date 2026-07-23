@@ -1,0 +1,48 @@
+Copyright (c) 2026 Sydney Kotar. All rights reserved.
+
+STATUS: This is a conservative, protective default license. The final
+commercial/licensing terms are pending professional review (gestor / IP
+lawyer). Marked [PENDIENTE — revisión gestor/abogado] until that review;
+until then, the all-rights-reserved terms below apply.
+
+------------------------------------------------------------------------
+
+This software and its source code, documentation, and associated materials
+(the "Software") are the proprietary work of Sydney Kotar (the "Owner"),
+created in the course of operating her photography, videography, and yoga
+teaching business in Barcelona, Spain.
+
+No license is granted. All rights are reserved. Without the Owner's prior
+written permission, you may NOT:
+
+  - use, run, or deploy the Software;
+  - copy, reproduce, or store it other than as incidental to viewing a page
+    on which the Owner has published it;
+  - modify, adapt, translate, or create derivative works from it;
+  - distribute, sublicense, sell, rent, or otherwise make it available to any
+    third party;
+  - remove or alter this notice or any authorship, copyright, or attribution
+    information.
+
+The Software being publicly viewable in a source repository does NOT place it
+in the public domain and does NOT grant any of the permissions above. Public
+visibility is an operational choice by the Owner, not a waiver of any right.
+
+THIRD-PARTY COMPONENTS: The Software depends on separately-licensed
+open-source packages. Those components remain under their own licenses; see
+legal/THIRD-PARTY-NOTICES.md. Nothing in this license alters your rights or
+obligations with respect to those third-party components.
+
+NO WARRANTY: The Software is provided "as is", without warranty of any kind,
+express or implied. The Owner is not liable for any claim, damage, or other
+liability arising from the Software or its use.
+
+PRECEDENCE OF WRITTEN AUTHORIZATIONS: Any specific authorization, beta-access
+agreement, commercial license, or terms of service granted in writing by the
+Owner shall prevail over these terms to the extent strictly necessary for the
+use expressly authorized therein. (Las autorizaciones especificas, contratos
+de beta, licencias comerciales o terminos de servicio otorgados por escrito
+por la titular prevaleceran sobre los presentes terminos en la medida
+estrictamente necesaria para el uso expresamente autorizado.)
+
+Contact for permissions: Sydney Kotar <kotarsyd@gmail.com>.

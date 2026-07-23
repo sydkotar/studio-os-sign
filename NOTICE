@@ -1,0 +1,19 @@
+Studio OS — e-signature app (studio-os-sign)
+Copyright (c) 2026 Sydney Kotar. All rights reserved.
+
+This is the e-signature companion to Studio OS, designed and directed by
+Sydney Kotar and built with AI assistance (Claude / Claude Code) under her
+direction.
+
+This repository is public for operational reasons (a free scheduled keep-alive
+ping). Public visibility is NOT a grant of any license: see LICENSE
+(proprietary, all rights reserved, pending professional review). No permission
+to use, copy, modify, or distribute is granted without the Owner's prior
+written permission.
+
+This app depends on third-party open-source packages (streamlit, supabase,
+pillow, reportlab, streamlit-drawable-canvas-fix, and their dependencies),
+each under its own license. A full inventory is maintained in the main
+Studio OS repository's legal/THIRD-PARTY-NOTICES.md.
+
+Contact: Sydney Kotar <kotarsyd@gmail.com>.
