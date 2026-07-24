@@ -1,0 +1,29 @@
+# Studio OS release manifest
+# tag:         v0.1.0
+# head_commit: 7ecbf7d8f17ac1e35a179780b8f2aa48bc5b20b7
+# built_utc:   2026-07-24T07:31:33Z
+# files:       18
+#
+# Each line below is: <sha256>  <versioned path>
+# The root hash at the bottom is what gets externally sealed.
+#
+a721492968bb6c1a5fc78223b3f5839e706f6f78cb3897c462f537be895d8d3c  .githooks/pre-commit
+d2ce841228a4a62483bdf894e1cc96b5455df4e14d2dc8867fa57f29ed5ecdb1  .githooks/pre-push
+d6abe7a795974dc2e5e7e9975b5e716ecbea20faaf92b4534243de000e00c2c7  .github/workflows/keep-awake.yml
+91a62c876aa8b961e9f3fb280b0fd55672ba6e49c2e14f5b024056c9aa4581f9  .gitignore
+fee6d9e770ddba2bb8315332ddc9e9ac66b54160f3ecaff238a43a6d2c6d99cb  .mailmap
+21d0f0e100054fb560ab0f53ca2aa1d312d55587a338b8ba343612363c477efe  LICENSE
+e11963a5315eeca28541a22b67bdfd9ddd9ff3bb5ee6c73c82eb397f8d508f61  NOTICE
+1ed85dbb2b78452977b819c08a626b9e65ab899794d18dfd72d67c952907cdc7  README.md
+e2b3837afa1eaf587d08df6795c0223bd9e9def9d5e76036e56822a724f19b57  app.py
+70644fb3e4af57a61e2b37523a9835d7c6f2dea3868e55577cee9491f1d5e277  contract_pdf.py
+9b23712af8b195d09831c6823e2352eb6d3f95e0efa2f5d548c83d9d12e87b0c  contract_templates/event_template.txt
+39cbf1491b7d0fb39c308a56c395d3d9c054f3530721f838249b39922520bb24  contract_templates/event_template_es.txt
+b42416c6c517bd8b9a505c004aa018dff1c4b27cf1d788ed468ef2ec9c638cf2  contract_templates/retreat_template.txt
+5adb13f512be14596fcdd91b8fc47f9d4725b9559f96f4bb09294c4a372aab2d  contract_templates/retreat_template_es.txt
+8aa5733e88ba2ca44102dffd9722ec32632afc9cf78a2dd4576cd8083c9f02f4  legal/allowed_signers
+f0a5da2f5b1ae9f09624050b948e4748dc34c0794290edf9f3b231e267e7ea82  requirements.txt
+81b5e0e7f6e2c77a9748615bd8da223d11a7d12cd4fbe5ef41f1ee5a63c03b99  scripts/make_manifest.sh
+a5907c071a61d837ffafd15376a37fa584a02d01f46b91a14a8610a97e95f6c1  scripts/scan_secrets.py
+#
+# root_sha256: 4dee16e2f222b654d230b2dc07f1deb1887799ab55f08b4ff944b3f899d91ca3
