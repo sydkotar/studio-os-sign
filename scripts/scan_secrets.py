@@ -84,15 +84,27 @@ def mask(s):
     return f"{s[:4]}…{s[-2:]} (len {len(s)})"
 
 
+def _decode_or_skip(data):
+    """Return decoded text, or None if the bytes are binary. A NUL byte is
+    git's own binary heuristic; binary blobs (.ots proofs, images, model files)
+    hold no text-shaped credential to scan, and forcing a strict decode on them
+    used to crash the pre-commit hook."""
+    if b"\x00" in data:
+        return None
+    return data.decode("utf-8", errors="ignore")
+
+
 def staged_files():
     out = subprocess.run(
         ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
         capture_output=True, text=True).stdout.split()
     for f in out:
-        blob = subprocess.run(["git", "show", f":{f}"],
-                              capture_output=True, text=True)
-        if blob.returncode == 0:
-            yield f, blob.stdout
+        blob = subprocess.run(["git", "show", f":{f}"], capture_output=True)
+        if blob.returncode != 0:
+            continue
+        text = _decode_or_skip(blob.stdout)
+        if text is not None:
+            yield f, text
 
 
 # --selftest cases: (should_be_caught, text). Assembled from fragments so this
@@ -143,7 +155,9 @@ def main(argv):
         for a in argv:
             p = Path(a)
             if p.is_file():
-                findings += scan_text(p.read_text(errors="ignore"), a)
+                text = _decode_or_skip(p.read_bytes())
+                if text is not None:
+                    findings += scan_text(text, a)
     else:
         print(__doc__)
         return 2
