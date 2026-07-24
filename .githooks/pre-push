@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# pre-push — structural release guard (runs on every `git push`).
+#
+# Purpose: make the safety checks a property of the repo, not of anyone
+# remembering to run them. On every push it re-runs the secret scan and the
+# OSS-license gate. When the push includes an ANNOTATED TAG (a release), it
+# also builds that release's manifest, records the root hash, and reminds you
+# to seal it externally.
+#
+# Enable once per clone:  git config core.hooksPath .githooks
+# stdin lines: <local ref> <local sha> <remote ref> <remote sha>
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+ZERO="0000000000000000000000000000000000000000"
+
+# --- always-on guards -------------------------------------------------------
+if [ -f scripts/scan_secrets.py ]; then
+  # Scan every tracked file's working copy for credential-shaped content.
+  if ! git ls-files -z | xargs -0 python3 scripts/scan_secrets.py; then
+    echo "pre-push BLOCKED: secret scan flagged tracked content (see above)." >&2
+    exit 1
+  fi
+fi
+if [ -f scripts/check_licenses.py ]; then
+  if ! python3 scripts/check_licenses.py --check; then
+    echo "pre-push BLOCKED: OSS-license gate failed (see above)." >&2
+    exit 1
+  fi
+fi
+
+# --- release path: annotated tags in this push ------------------------------
+released_a_tag=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$local_ref" in
+    refs/tags/*) : ;;
+    *) continue ;;
+  esac
+  [ "$local_sha" = "$ZERO" ] && continue                 # tag deletion
+  # annotated tags are objects of type "tag"; lightweight tags are not
+  [ "$(git cat-file -t "$local_sha" 2>/dev/null)" = "tag" ] || continue
+  tag="${local_ref#refs/tags/}"
+  if [ -f scripts/make_manifest.sh ]; then
+    echo "pre-push: release tag '$tag' detected — building manifest…"
+    bash scripts/make_manifest.sh "$tag"
+    released_a_tag=1
+  fi
+done
+
+if [ "$released_a_tag" = "1" ]; then
+  echo ""
+  echo "  ┌─ RELEASE SEALING REMINDER ───────────────────────────────────┐"
+  echo "  │ The root hash above proves this exact code existed now.        │"
+  echo "  │ Seal it externally so it stands up later:                      │"
+  echo "  │   1. Qualified eIDAS timestamp (pay for this) — strongest.     │"
+  echo "  │   2. Safe Creative / registry — middle option.                 │"
+  echo "  │   3. OpenTimestamps — free corroboration, not a substitute.    │"
+  echo "  │ Record what you did in SETUP.md. See docs/legal-base-build-    │"
+  echo "  │ plan.md Phase D.                                               │"
+  echo "  └───────────────────────────────────────────────────────────────┘"
+fi
+exit 0
